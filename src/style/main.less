@@ -1,15 +1,18 @@
-@import 'fonts.less';
-@import 'libs.less';
-@import 'vars.less';
+@import 'fonts';
+@import 'libs';
+@import 'vars';
+// @import '../img/sprite/sprite';
 
 html { 
   line-height: 1;
   font-size: 14px;
 }
-
 body {
-  font-family: mainFont;
-  color: mainColor;
+  width: 100%;
+  max-width: 2570px;
+  margin: 0 auto;
+  font-family: @mainFont;
+  color: @mainColor;
 }
 h1,h2,h3,h4,h5,h6 {
   margin: 0;
@@ -39,7 +42,7 @@ textarea {
 }
 section {
   position: relative;
-  padding: 90px 0;
+  padding: 40px 0;
 }
 input,
 select,
@@ -49,8 +52,18 @@ button {
 *, *:before, *:after {
   box-sizing: border-box;
 }
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+.icon {
+  display: inline-block;
+}
 
 @import 'modules/header';
 
 
 @import 'modules/footer';
+@import 'media';

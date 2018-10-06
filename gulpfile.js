@@ -18,6 +18,7 @@ var path = {
     js:    'build/js/',
     css:   'build/css/',
     img:   'build/img/',
+    spr:   'src/img/sprite',
     fonts: 'build/fonts/'
   },
   src: {
@@ -25,6 +26,7 @@ var path = {
     js:    'src/js/main.js',
     style: 'src/style/main.less',
     img:   'src/img/**/*.*',
+    spr:   'src/img/icon/*.png',
     fonts: 'src/fonts/**/*.*'
   },
   watch: {
@@ -32,6 +34,7 @@ var path = {
     js:    'src/js/**/*.js',
     css:   'src/style/**/*.less',
     img:   'src/img/**/*.*',
+    spr:   'src/img/sprite/.png',
     fonts: 'srs/fonts/**/*.*'
   },
   clean:     './build'
@@ -60,7 +63,8 @@ var gulp = require('gulp'),  // подключаем Gulp
   pngquant = require('imagemin-pngquant'), // плагин для сжатия png
   del = require('del'), // плагин для удаления файлов и каталогов
   notify = require('gulp-notify'), // уведомления ошибок
-  run = require('run-sequence'); 
+  run = require('run-sequence'),
+  spritesmith = require('gulp.spritesmith'); // сборка спрайтов  
 
 /* задачи */
 
@@ -115,7 +119,7 @@ gulp.task('fonts:build', function() {
 
 // обработка картинок
 gulp.task('image:build', function () {
-  gulp.src(path.src.img) 
+  gulp.src([path.src.img, '!src/img/**/*.less'])
     .pipe(cache(imagemin([ 
       imagemin.gifsicle({interlaced: true}),
         jpegrecompress({
@@ -127,6 +131,15 @@ gulp.task('image:build', function () {
         imagemin.svgo({plugins: [{removeViewBox: false}]})
   	])))
     .pipe(gulp.dest(path.build.img)); 
+});
+
+gulp.task('sprite:build', function () {
+  var spriteData = gulp.src(path.src.spr).pipe(spritesmith({
+    imgName: 'sprite.png',
+    cssName: 'sprite.less',
+    imgPath: '../img/sprite/sprite.png'
+  }));
+  return spriteData.pipe(gulp.dest(path.build.spr));
 });
 
 // удаление каталога build 
@@ -147,6 +160,7 @@ gulp.task('build', function(fn) {
   'css:build',
   'js:build',
   'fonts:build',
+  'sprite:build',
   'image:build',
   fn  
   );
@@ -157,14 +171,17 @@ gulp.task('watch', function() {
   gulp.watch(path.watch.html, ['html:build']);
   gulp.watch(path.watch.css, ['css:build']);
   gulp.watch(path.watch.js, ['js:build']);
+  gulp.watch(path.watch.spr, ['sprite:build']);
   gulp.watch(path.watch.img, ['image:build']);
   gulp.watch(path.watch.fonts, ['fonts:build']);
 });
-
+ 
 // задача по умолчанию
-gulp.task('default', [
-  'clean:build',
-  'build',
-  'webserver',
-  'watch'
-]);
+gulp.task('default', function (fn){
+  run(
+    'build',
+    'webserver',
+    'watch',
+    fn
+  );
+});
