@@ -25,8 +25,10 @@ var path = {
     html:  'src/*.html',
     js:    'src/js/main.js',
     style: 'src/style/main.less',
-    img:   'src/img/**/*.*',
-    spr:   'src/img/icon/*.png',
+    img:   'src/img/**/*.{jpg,png,gif}',
+		spr:   'src/img/icon/**/*.png',
+		sprSvg: 'src/img/icon/**/*.svg',
+		sprNo: '!src/img/icon/**/*.{png,svg}',
     fonts: 'src/fonts/**/*.*'
   },
   watch: {
@@ -34,7 +36,8 @@ var path = {
     js:    'src/js/**/*.js',
     css:   'src/style/**/*.less',
     img:   'src/img/**/*.*',
-    spr:   'src/img/sprite/.png',
+		spr:   'src/img/icon/**/*.png',
+		sprSvg:'src/img/icon/**/*.svg',
     fonts: 'srs/fonts/**/*.*'
   },
   clean:     './build'
@@ -117,29 +120,45 @@ gulp.task('fonts:build', function() {
     .pipe(gulp.dest(path.build.fonts));
 });
 
-// обработка картинок
+//обработка картинок
 gulp.task('image:build', function () {
-  gulp.src([path.src.img, '!src/img/**/*.less'])
+  gulp.src([path.src.img, path.src.sprNo])
     .pipe(cache(imagemin([ 
       imagemin.gifsicle({interlaced: true}),
-        jpegrecompress({
-          progressive: true,
-          max: 90,
-          min: 80
-        }),
-        pngquant(),
-        imagemin.svgo({plugins: [{removeViewBox: false}]})
+			imagemin.optipng({optimizationLevel: 3}),
+			imagemin.jpegtran({progressive: true})
   	])))
     .pipe(gulp.dest(path.build.img)); 
 });
 
+// сборка png
 gulp.task('sprite:build', function () {
-  var spriteData = gulp.src(path.src.spr).pipe(spritesmith({
+	var spriteData = gulp.src(path.src.spr)
+	.pipe(spritesmith({
     imgName: 'sprite.png',
     cssName: 'sprite.less',
     imgPath: '../img/sprite/sprite.png'
   }));
   return spriteData.pipe(gulp.dest(path.build.spr));
+});
+
+// сборка svg
+gulp.task('symbols:build', function(){
+	gulp.src(path.src.sprSvg)
+		.pipe(svgmin())
+		.pipe(cheerio({
+      run: function ($) {
+				$('[fill]').removeAttr('fill');
+				$('[stroke]').removeAttr('stroke');
+				$('[style]').removeAttr('style');
+			},
+			parserOptions: {xmlMode: true}
+    }))
+		.pipe(svgstore({
+			inlineSvg: true
+		}))
+		.pipe(rename('symbols.svg'))
+		.pipe(gulp.dest(path.build.spr))
 });
 
 // удаление каталога build 
@@ -160,7 +179,8 @@ gulp.task('build', function(fn) {
   'css:build',
   'js:build',
   'fonts:build',
-  'sprite:build',
+	// 'sprite:build',
+	'symbols:build',
   'image:build',
   fn  
   );
@@ -171,7 +191,8 @@ gulp.task('watch', function() {
   gulp.watch(path.watch.html, ['html:build']);
   gulp.watch(path.watch.css, ['css:build']);
   gulp.watch(path.watch.js, ['js:build']);
-  gulp.watch(path.watch.spr, ['sprite:build']);
+	// gulp.watch(path.watch.spr, ['sprite:build',]);
+	gulp.watch(path.watch.sprSvg, ['symbols:build']);
   gulp.watch(path.watch.img, ['image:build']);
   gulp.watch(path.watch.fonts, ['fonts:build']);
 });
