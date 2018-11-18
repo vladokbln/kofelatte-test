@@ -18,7 +18,8 @@ var path = {
     js:    'build/js/',
     css:   'build/css/',
     img:   'build/img/',
-    spr:   'src/img/sprite',
+		spr:   'src/img/sprite',
+		sprSvg:'build/img/sprite',
     fonts: 'build/fonts/'
   },
   src: {
@@ -35,7 +36,7 @@ var path = {
     html:  'src/**/*.html',
     js:    'src/js/**/*.js',
     css:   'src/style/**/*.less',
-    img:   'src/img/**/*.*',
+    img:   'src/img/**/*.{jpg,png,gif},
 		spr:   'src/img/icon/**/*.png',
 		sprSvg:'src/img/icon/**/*.svg',
     fonts: 'srs/fonts/**/*.*'
@@ -62,12 +63,15 @@ var gulp = require('gulp'),  // подключаем Gulp
   uglify = require('gulp-uglify'), // модуль для минимизации JavaScript
   cache = require('gulp-cache'), // модуль для кэширования
   imagemin = require('gulp-imagemin'), // плагин для сжатия PNG, JPEG, GIF и SVG изображений
-  jpegrecompress = require('imagemin-jpeg-recompress'), // плагин для сжатия jpeg	
-  pngquant = require('imagemin-pngquant'), // плагин для сжатия png
   del = require('del'), // плагин для удаления файлов и каталогов
   notify = require('gulp-notify'), // уведомления ошибок
   run = require('run-sequence'),
-  spritesmith = require('gulp.spritesmith'); // сборка спрайтов  
+	svgstore = require('gulp-svgstore'), // сборка svg
+	svgmin = require('gulp-svgmin'), // мин svg
+	spritesmith = require('gulp.spritesmith'), // сборка спрайтов png
+	cheerio = require('gulp-cheerio'), // удаление атрибутов
+	rename = require("gulp-rename");
+
 
 /* задачи */
 
@@ -158,7 +162,7 @@ gulp.task('symbols:build', function(){
 			inlineSvg: true
 		}))
 		.pipe(rename('symbols.svg'))
-		.pipe(gulp.dest(path.build.spr))
+		.pipe(gulp.dest(path.build.sprSvg))
 });
 
 // удаление каталога build 
