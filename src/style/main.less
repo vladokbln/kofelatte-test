@@ -1,15 +1,13 @@
 @import 'fonts';
 @import 'libs';
 @import 'vars';
-// @import '../img/sprite/sprite';
 
 html { 
-  line-height: 1;
+  line-height: 1.2;
   font-size: 14px;
 }
 body {
   width: 100%;
-  max-width: 2570px;
   margin: 0 auto;
   font-family: @mainFont;
   color: @mainColor;
@@ -23,7 +21,8 @@ ul,li {
   list-style-type: none;
 }  
 p {
-  margin: 0;
+	margin: 0;
+	text-align: justify;
 }  
 a {
   text-decoration: none;
@@ -36,7 +35,10 @@ img,
 svg,
 video {
   vertical-align: middle;
-}  
+} 
+img {
+	width: 100%;;
+} 
 textarea {
   resize: none;
 }
@@ -52,18 +54,43 @@ button {
 *, *:before, *:after {
   box-sizing: border-box;
 }
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 15px;
+.padding {
+	> [class*='col-'] {
+		padding: 15px;
+	}
 }
-.icon {
-  display: inline-block;
+.no-gutter {
+	margin: 0;
+	> [class*='col-'] {
+		padding-right:0;
+		padding-left:0;
+	}
 }
-
+.full-img {
+	height: 100px;
+	object-fit: cover;
+}
+.border {
+	border: 1px solid #000;
+}
+#toTop {
+	width:100px;
+	border:1px solid #ccc;
+	background:#f7f7f7;
+	text-align:center;
+	padding:5px;
+	position:fixed;
+	bottom:10px;
+	right:10px;
+	cursor:pointer;
+	display:none;
+	color:#333;
+	font-size:11px;
+}
 @import 'modules/header';
-
+@import 'sections/block-1';
+@import 'sections/block-2';
+@import 'sections/block-3';
 
 @import 'modules/footer';
 @import 'media';

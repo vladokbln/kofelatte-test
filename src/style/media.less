@@ -2,13 +2,71 @@
 	// prop
 }	
 @media only screen and (max-width: 992px) { 
-	// prop
+	section {
+		padding: 20px 0;
+	}
 }	
 @media only screen and (max-width: 768px) { 
-	// prop
+	.header {
+		&__img {
+			img {
+				height: 200px;
+				object-fit: cover;
+			}
+		}
+	}
+	.block-3 {
+		&__item {
+			&--right-icon {
+				flex-direction: row;
+				.block-3__img {
+					margin-left: 0;
+					margin-right: 10px;
+				}
+			}
+		}
+	}
+	.footer {
+		&__item {
+			margin: 15px 0;
+		}
+	}
 }	
 @media only screen and (max-width: 480px) { 
-	// prop
+	.header-nav {
+		position: relative;
+		&__list {
+			display: none;
+			width: 100%;
+			position: absolute;
+			top: 0;
+			left: 0;
+			padding: 0;
+			background-color: #fff;
+			border: 1px solid #000;
+		}
+		&__item {
+			width: 100%;
+			border-bottom: 1px solid #000;
+			border-right: none;
+		}
+		&__link {
+			padding: 15px 0;
+			text-align: center;
+		}
+		&.active & {
+			&__list {
+				display: block;
+			}
+			&-toggle {
+				width: 30px;
+				height: 30px;
+			}
+		}
+	}
+	.header-nav-toggle {
+    display: block;
+	}
 }	
 @media only screen and (max-width: 360px) { 
 	// prop

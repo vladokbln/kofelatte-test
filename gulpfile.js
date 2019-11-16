@@ -18,28 +18,24 @@ var path = {
     js:    'build/js/',
     css:   'build/css/',
     img:   'build/img/',
-		spr:   'src/img/sprite',
-		sprSvg:'build/img/sprite',
-    fonts: 'build/fonts/'
+		fonts: 'build/fonts/',
+    webFonts: 'build/webfonts/'		
   },
   src: {
     html:  'src/*.html',
     js:    'src/js/main.js',
     style: 'src/style/main.less',
-    img:   'src/img/**/*.{jpg,png,gif}',
-		spr:   'src/img/icon/**/*.png',
-		sprSvg: 'src/img/icon/**/*.svg',
-		sprNo: '!src/img/icon/**/*.{png,svg}',
-    fonts: 'src/fonts/**/*.*'
+    img:   'src/img/**/*.*',
+    fonts: 'src/fonts/**/*.*',
+    webFonts: 'src/bower_components/components-font-awesome/webfonts/**/*.*'
   },
   watch: {
     html:  'src/**/*.html',
     js:    'src/js/**/*.js',
     css:   'src/style/**/*.less',
-    img:   'src/img/**/*.{jpg,png,gif},
-		spr:   'src/img/icon/**/*.png',
-		sprSvg:'src/img/icon/**/*.svg',
-    fonts: 'srs/fonts/**/*.*'
+    img:   'src/img/**/*.*',
+		fonts: 'srs/fonts/**/*.*',
+		webFonts: 'src/bower_components/components-font-awesome/webfonts/**/*.*'
   },
   clean:     './build'
 };
@@ -62,13 +58,12 @@ var gulp = require('gulp'),  // подключаем Gulp
   cleanCSS = require('gulp-clean-css'), // плагин для минимизации CSS
   uglify = require('gulp-uglify'), // модуль для минимизации JavaScript
   cache = require('gulp-cache'), // модуль для кэширования
-  imagemin = require('gulp-imagemin'), // плагин для сжатия PNG, JPEG, GIF и SVG изображений
+	imagemin = require('gulp-imagemin'), // плагин для сжатия PNG, JPEG, GIF и SVG изображений
+	jpegrecompress = require('imagemin-jpeg-recompress'), // плагин для сжатия jpeg	
+  pngquant = require('imagemin-pngquant'), // плагин для сжатия png
   del = require('del'), // плагин для удаления файлов и каталогов
   notify = require('gulp-notify'), // уведомления ошибок
   run = require('run-sequence'),
-	svgstore = require('gulp-svgstore'), // сборка svg
-	svgmin = require('gulp-svgmin'), // мин svg
-	spritesmith = require('gulp.spritesmith'), // сборка спрайтов png
 	cheerio = require('gulp-cheerio'), // удаление атрибутов
 	rename = require("gulp-rename");
 
@@ -124,45 +119,25 @@ gulp.task('fonts:build', function() {
     .pipe(gulp.dest(path.build.fonts));
 });
 
-//обработка картинок
+// перенос web-шрифтов
+gulp.task('webFonts:build', function() {
+  gulp.src(path.src.webFonts)
+    .pipe(gulp.dest(path.build.webFonts));
+});
+
+// обработка картинок
 gulp.task('image:build', function () {
-  gulp.src([path.src.img, path.src.sprNo])
+  gulp.src(path.src.img) 
     .pipe(cache(imagemin([ 
       imagemin.gifsicle({interlaced: true}),
-			imagemin.optipng({optimizationLevel: 3}),
-			imagemin.jpegtran({progressive: true})
+        jpegrecompress({
+          progressive: true,
+          max: 90,
+          min: 80
+        }),
+        pngquant()
   	])))
     .pipe(gulp.dest(path.build.img)); 
-});
-
-// сборка png
-gulp.task('sprite:build', function () {
-	var spriteData = gulp.src(path.src.spr)
-	.pipe(spritesmith({
-    imgName: 'sprite.png',
-    cssName: 'sprite.less',
-    imgPath: '../img/sprite/sprite.png'
-  }));
-  return spriteData.pipe(gulp.dest(path.build.spr));
-});
-
-// сборка svg
-gulp.task('symbols:build', function(){
-	gulp.src(path.src.sprSvg)
-		.pipe(svgmin())
-		.pipe(cheerio({
-      run: function ($) {
-				$('[fill]').removeAttr('fill');
-				$('[stroke]').removeAttr('stroke');
-				$('[style]').removeAttr('style');
-			},
-			parserOptions: {xmlMode: true}
-    }))
-		.pipe(svgstore({
-			inlineSvg: true
-		}))
-		.pipe(rename('symbols.svg'))
-		.pipe(gulp.dest(path.build.sprSvg))
 });
 
 // удаление каталога build 
@@ -182,9 +157,8 @@ gulp.task('build', function(fn) {
   'html:build',
   'css:build',
   'js:build',
-  'fonts:build',
-	// 'sprite:build',
-	'symbols:build',
+	'fonts:build',
+	'webFonts:build',
   'image:build',
   fn  
   );
@@ -195,10 +169,9 @@ gulp.task('watch', function() {
   gulp.watch(path.watch.html, ['html:build']);
   gulp.watch(path.watch.css, ['css:build']);
   gulp.watch(path.watch.js, ['js:build']);
-	// gulp.watch(path.watch.spr, ['sprite:build',]);
-	gulp.watch(path.watch.sprSvg, ['symbols:build']);
   gulp.watch(path.watch.img, ['image:build']);
-  gulp.watch(path.watch.fonts, ['fonts:build']);
+	gulp.watch(path.watch.fonts, ['fonts:build']);
+	gulp.watch(path.watch.webFonts, ['webFonts:build']);
 });
  
 // задача по умолчанию
